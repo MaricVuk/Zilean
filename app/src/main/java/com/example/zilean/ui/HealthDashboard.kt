@@ -10,7 +10,9 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.QrCodeScanner
 import androidx.compose.material3.*
+import androidx.compose.material3.OutlinedTextFieldDefaults.contentPadding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -23,27 +25,29 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.zilean.data.FoodEntry
 import com.example.zilean.ui.theme.ZileanTheme
 
-@Composable
 /*fun HealthDashboard(proteinGoal: Int,
                     caloriesGoal: Int,
                     carbsGoal: Int,
                     fatsGoal: Int
                     ) {*/
+
+@Composable
 fun HealthDashboard(
     name: String?,
-    currentProtein: Int,
-    proteinGoal: Int,
-    onAddFoodClick: () -> Unit,
     currentCalories: Int,
+    currentProtein: Int,
     currentCarb: Int,
     currentFat: Int,
+    proteinGoal: Int,
     caloriesGoal: Int,
     carbsGoal: Int,
     fatsGoal: Int,
+    foodList: List<FoodEntry>,
+    onAddFoodClick: () -> Unit,
     onDeleteEntry: (FoodEntry) -> Unit,
-    foodList: List<FoodEntry>
-){
-    val progress = (currentCalories * 100) / caloriesGoal
+    onScanClick: () -> Unit
+) {
+    val progress = if (caloriesGoal > 0) (currentCalories * 100) / caloriesGoal else 0
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -79,7 +83,7 @@ fun HealthDashboard(
                 Spacer(modifier = Modifier.width(32.dp))
 
                 Column {
-                    Text("Preostalo", color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 14.sp)
+                    Text("Kalorije", color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 18.sp)
                     Row (verticalAlignment = Alignment.Bottom, horizontalArrangement = Arrangement.spacedBy(4.dp)){
                         Text(
                             currentCalories.toString(),
@@ -136,45 +140,59 @@ fun HealthDashboard(
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        Button(
-            onClick = onAddFoodClick,
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(56.dp),
-            shape = RoundedCornerShape(12.dp)
-        ) {
-            //Icon(Icons.Default.Add, contentDescription = null)
-            Spacer(modifier = Modifier.width(8.dp))
-            Text(text = "Dodaj obrok",
-                fontSize = 28.sp,
-                color = MaterialTheme.colorScheme.onSurface,
-                fontWeight = FontWeight.Bold,
+
+
+        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            Button(
+                onClick = onAddFoodClick,
+                modifier = Modifier
+                    .fillMaxWidth(0.8f)
+                    .height(64.dp),
+                shape = RoundedCornerShape(12.dp)
+            ) {
+                //Icon(Icons.Default.Add, contentDescription = null)
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(
+                    text = "Dodaj obrok",
+                    fontSize = 28.sp,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    fontWeight = FontWeight.Bold,
                 )
+            }
+
+            //Spacer(modifier = Modifier.height(16.dp))
+
+            FilledIconButton(
+                onClick = onScanClick,
+                modifier = Modifier.size(64.dp).fillMaxWidth(0.2f),
+                shape = RoundedCornerShape(12.dp),
+                colors = IconButtonDefaults.filledIconButtonColors(
+                    containerColor = MaterialTheme.colorScheme.primary
+                ),
+            ) {
+                Icon(
+                    imageVector = Icons.Default.QrCodeScanner,
+                    contentDescription = "Skeniraj bar-kod",
+                    Modifier.size(44.dp),
+                    tint = MaterialTheme.colorScheme.onSurface
+                )
+            }
+
         }
 
-        Spacer(modifier = Modifier.height(16.dp))
-        Text(text = "Danasnji obroci", style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.onSurface)
 
-        LazyColumn(modifier = Modifier.fillMaxSize()) {
+
+        Spacer(modifier = Modifier.height(16.dp))
+        Text(text = "Danasnji obroci:", style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.onSurface)
+
+        LazyColumn(modifier = Modifier.fillMaxSize(), contentPadding = PaddingValues(bottom = 16.dp)) {
             items(foodList) { currentEntry ->
                 FoodItemRow(
                     entry = currentEntry,
-                    onDelete = { onDeleteEntry(currentEntry) }
+                    onDelete = { onDeleteEntry(currentEntry) },
                 )
             }
         }
-
-
-
-        /*Button(
-            onClick = {  },
-            modifier = Modifier.fillMaxWidth().height(56.dp),
-            shape = RoundedCornerShape(16.dp),
-            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
-        ) {
-            Text("DODAJ OBROK", fontWeight = FontWeight.Bold, fontSize = 22.sp,
-                color = MaterialTheme.colorScheme.onSurface)
-        }*/
     }
 }
 
@@ -241,7 +259,22 @@ fun DashboardPreview() {
 @Composable
 fun DashboardLightPreview() {
     ZileanTheme(darkTheme = false) {
-        //HealthDashboard()
+        HealthDashboard(
+            name = "Vuk",
+            currentCalories = 1538,
+            currentProtein = 73,
+            currentCarb = 127,
+            currentFat = 13,
+
+            proteinGoal = 250,
+            caloriesGoal = 2750,
+            carbsGoal = 600,
+            fatsGoal = 80,
+            foodList = emptyList(),
+            onAddFoodClick = { true },
+            onDeleteEntry = {true },
+            onScanClick = {true}
+        )
     }
 }
 
@@ -262,7 +295,8 @@ fun DashboardDarkPreview() {
             fatsGoal = 80,
             foodList = emptyList(),
             onAddFoodClick = { true },
-            onDeleteEntry = {true }
+            onDeleteEntry = {true },
+            onScanClick = {true}
         )
     }
 }

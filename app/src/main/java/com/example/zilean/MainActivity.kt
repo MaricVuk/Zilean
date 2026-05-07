@@ -15,8 +15,11 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.getValue
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.zilean.data.ProductMetadata
 import com.example.zilean.ui.AddFoodDialog
 import com.example.zilean.ui.FoodViewModel
 import com.example.zilean.ui.HealthDashboard
@@ -62,17 +65,46 @@ class MainActivity : ComponentActivity() {
                                 val foodList by viewModel.getTodaysFoodEntries().collectAsState(initial = emptyList())
 
                                 var showDialog by remember { mutableStateOf(false) }
+                                var scannedBarcode by remember { mutableStateOf<String?>(null) }
+                                var initialData by remember { mutableStateOf<ProductMetadata?>(null) }
+
+                                val context = LocalContext.current
 
                                 if (showDialog) {
                                     AddFoodDialog(
-                                        onDismiss = { showDialog = false },
+                                        initialName = initialData?.name ?: "",
+                                        initialProtein = initialData?.proteinPer100g?.toString() ?: "",
+                                        initialCalories = initialData?.caloriesPer100g?.toString() ?: "",
+                                        initialCarbs = initialData?.carbsPer100g?.toString() ?: "",
+                                        initialFats = initialData?.fatsPer100g?.toString() ?: "",
+
+                                        onDismiss = {
+                                            showDialog = false
+                                            initialData = null
+                                            scannedBarcode = null
+                                        },
                                         onConfirm = { name, prot, cal, carb, fat ->
                                             viewModel.addFood(name, prot, cal, carb, fat)
+
+                                            scannedBarcode?.let { code ->
+                                                viewModel.saveProductMetadata(
+                                                    ProductMetadata(
+                                                        barcode = code,
+                                                        name = name,
+                                                        proteinPer100g = prot,
+                                                        caloriesPer100g = cal,
+                                                        carbsPer100g = carb,
+                                                        fatsPer100g = fat
+                                                    )
+                                                )
+                                            }
+
                                             showDialog = false
+                                            scannedBarcode = null
+                                            initialData = null
                                         }
                                     )
                                 }
-
                                 HealthDashboard(
                                     name = userName,
                                     currentCalories = todaysCalories ?: 0,
@@ -86,16 +118,25 @@ class MainActivity : ComponentActivity() {
                                     fatsGoal = goalFat,
                                     foodList = foodList,
                                     onAddFoodClick = { showDialog = true },
-                                    onDeleteEntry = { entry -> viewModel.deleteEntry(entry) }
+                                    onDeleteEntry = { entry -> viewModel.deleteEntry(entry) },
+                                    onScanClick = {
+                                        viewModel.scanBarcode(context) { metadata, barcode ->
+                                            if (metadata != null) {
+                                                viewModel.addFood(
+                                                    name = metadata.name,
+                                                    protein = metadata.proteinPer100g,
+                                                    calories = metadata.caloriesPer100g,
+                                                    carbs = metadata.carbsPer100g,
+                                                    fats = metadata.fatsPer100g
+                                                )
+                                            } else {
+                                                scannedBarcode = barcode
+                                                initialData = null
+                                                showDialog = true
+                                            }
+                                        }
+                                    }
                                 )
-
-
-                                /*HealthDashboard(
-                                    proteinGoal = goalProt,
-                                    caloriesGoal = goalCal,
-                                    carbsGoal = goalCarb,
-                                    fatsGoal = goalFat
-                                )*/
 
                             }
                         }

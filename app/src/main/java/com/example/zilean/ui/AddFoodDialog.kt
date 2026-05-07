@@ -1,7 +1,9 @@
 package com.example.zilean.ui
 
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.*
@@ -14,6 +16,11 @@ import androidx.compose.ui.unit.dp
 
 @Composable
 fun AddFoodDialog(
+    initialName: String = "",
+    initialProtein: String = "",
+    initialCalories: String = "",
+    initialCarbs: String = "",
+    initialFats: String = "",
     onDismiss: () -> Unit,
     onConfirm: (String, Int, Int, Int, Int) -> Unit
 ) {
@@ -24,11 +31,19 @@ fun AddFoodDialog(
     var fats by remember {mutableStateOf("")}
     var showError by remember { mutableStateOf(false) }
 
+    LaunchedEffect(initialName, initialProtein) {
+        name = initialName
+        protein = initialProtein
+        calories = initialCalories
+        carbs = initialCarbs
+        fats = initialFats
+    }
+
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text(text = "Unesi obrok", fontWeight = FontWeight.Bold) },
         text = {
-            Column {
+            Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
                 OutlinedTextField(
                     value = name,
                     onValueChange = { name = it

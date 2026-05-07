@@ -29,4 +29,10 @@ interface FoodDao {
     @Query("DELETE FROM food_entries WHERE id = :entryId")
     suspend fun deleteFood(entryId: Int)
 
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertProductMetadata(product: ProductMetadata)
+
+    @Query("SELECT * FROM product_metadata WHERE barcode = :barcode LIMIT 1")
+    suspend fun getProductByBarcode(barcode: String): ProductMetadata?
+
 }

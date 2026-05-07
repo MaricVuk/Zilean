@@ -59,7 +59,7 @@ class MainActivity : ComponentActivity() {
                                 val todaysCalories by viewModel.getTodaysCalories().collectAsState(initial = 0)
                                 val todaysCarbs by viewModel.getTodaysCarbs().collectAsState(initial = 0)
                                 val todaysFats by viewModel.getTodaysFats().collectAsState(initial = 0)
-
+                                val foodList by viewModel.getTodaysFoodEntries().collectAsState(initial = emptyList())
 
                                 var showDialog by remember { mutableStateOf(false) }
 
@@ -84,7 +84,9 @@ class MainActivity : ComponentActivity() {
                                     caloriesGoal = goalCal,
                                     carbsGoal = goalCarb,
                                     fatsGoal = goalFat,
-                                    onAddFoodClick = { showDialog = true } // Sada dugme samo otvara dijalog!
+                                    foodList = foodList,
+                                    onAddFoodClick = { showDialog = true },
+                                    onDeleteEntry = { entry -> viewModel.deleteEntry(entry) }
                                 )
 
 

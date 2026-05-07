@@ -64,4 +64,23 @@ class FoodViewModel(application: Application) : AndroidViewModel(application) {
         }
         return dao.getTodaysFats(calendar.timeInMillis)
     }
+
+
+    fun getTodaysFoodEntries(): Flow<List<FoodEntry>> {
+        val calendar = Calendar.getInstance().apply {
+            set(Calendar.HOUR_OF_DAY, 0)
+            set(Calendar.MINUTE, 0)
+            set(Calendar.SECOND, 0)
+            set(Calendar.MILLISECOND, 0)
+        }
+        return dao.getTodaysFoodList(calendar.timeInMillis)
+    }
+
+    fun deleteEntry(entry: FoodEntry) {
+        viewModelScope.launch {
+            dao.deleteFood(entry.id)
+        }
+    }
+
+
 }

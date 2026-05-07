@@ -1,9 +1,12 @@
 package com.example.zilean.ui
 
+import android.R
 import android.content.res.Configuration
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -16,6 +19,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.zilean.data.FoodEntry
 import com.example.zilean.ui.theme.ZileanTheme
 
 @Composable
@@ -34,7 +39,9 @@ fun HealthDashboard(
     currentFat: Int,
     caloriesGoal: Int,
     carbsGoal: Int,
-    fatsGoal: Int
+    fatsGoal: Int,
+    onDeleteEntry: (FoodEntry) -> Unit,
+    foodList: List<FoodEntry>
 ){
     val progress = (currentCalories * 100) / caloriesGoal
     Column(
@@ -136,9 +143,25 @@ fun HealthDashboard(
                 .height(56.dp),
             shape = RoundedCornerShape(12.dp)
         ) {
-            Icon(Icons.Default.Add, contentDescription = null)
+            //Icon(Icons.Default.Add, contentDescription = null)
             Spacer(modifier = Modifier.width(8.dp))
-            Text(text = "Dodaj obrok", fontSize = 24.sp)
+            Text(text = "Dodaj obrok",
+                fontSize = 28.sp,
+                color = MaterialTheme.colorScheme.onSurface,
+                fontWeight = FontWeight.Bold,
+                )
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+        Text(text = "Danasnji obroci", style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.onSurface)
+
+        LazyColumn(modifier = Modifier.fillMaxSize()) {
+            items(foodList) { currentEntry ->
+                FoodItemRow(
+                    entry = currentEntry,
+                    onDelete = { onDeleteEntry(currentEntry) }
+                )
+            }
         }
 
 
@@ -226,6 +249,20 @@ fun DashboardLightPreview() {
 @Composable
 fun DashboardDarkPreview() {
     ZileanTheme(darkTheme = true) {
-        //HealthDashboard()
+        HealthDashboard(
+            name = "Vuk",
+            currentCalories = 1538,
+            currentProtein = 73,
+            currentCarb = 127,
+            currentFat = 13,
+
+            proteinGoal = 250,
+            caloriesGoal = 2750,
+            carbsGoal = 600,
+            fatsGoal = 80,
+            foodList = emptyList(),
+            onAddFoodClick = { true },
+            onDeleteEntry = {true }
+        )
     }
 }

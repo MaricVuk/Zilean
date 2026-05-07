@@ -9,11 +9,19 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.zilean.ui.AddFoodDialog
+import com.example.zilean.ui.FoodViewModel
+import com.example.zilean.ui.HealthDashboard
+import com.example.zilean.ui.SetupScreen
+
 import com.example.zilean.ui.theme.ZileanTheme
 
 class MainActivity : ComponentActivity() {
@@ -40,17 +48,52 @@ class MainActivity : ComponentActivity() {
                                 })
                             } else {
 
+                                val userName = sharedPref.getString("user_name", "person")
                                 val goalProt = sharedPref.getInt("goal_protein", 190)
                                 val goalCal = sharedPref.getInt("goal_calories", 2000)
                                 val goalCarb = sharedPref.getInt("goal_carbs", 200)
                                 val goalFat = sharedPref.getInt("goal_fats", 70)
 
+                                val viewModel: FoodViewModel = viewModel()
+                                val todaysProtein by viewModel.getTodaysProtein().collectAsState(initial = 0)
+                                val todaysCalories by viewModel.getTodaysCalories().collectAsState(initial = 0)
+                                val todaysCarbs by viewModel.getTodaysCarbs().collectAsState(initial = 0)
+                                val todaysFats by viewModel.getTodaysFats().collectAsState(initial = 0)
+
+
+                                var showDialog by remember { mutableStateOf(false) }
+
+                                if (showDialog) {
+                                    AddFoodDialog(
+                                        onDismiss = { showDialog = false },
+                                        onConfirm = { name, prot, cal, carb, fat ->
+                                            viewModel.addFood(name, prot, cal, carb, fat)
+                                            showDialog = false
+                                        }
+                                    )
+                                }
+
                                 HealthDashboard(
+                                    name = userName,
+                                    currentCalories = todaysCalories ?: 0,
+                                    currentProtein = todaysProtein ?: 0,
+                                    currentCarb = todaysCarbs ?: 0,
+                                    currentFat = todaysFats ?: 0,
+
+                                    proteinGoal = goalProt,
+                                    caloriesGoal = goalCal,
+                                    carbsGoal = goalCarb,
+                                    fatsGoal = goalFat,
+                                    onAddFoodClick = { showDialog = true } // Sada dugme samo otvara dijalog!
+                                )
+
+
+                                /*HealthDashboard(
                                     proteinGoal = goalProt,
                                     caloriesGoal = goalCal,
                                     carbsGoal = goalCarb,
                                     fatsGoal = goalFat
-                                )
+                                )*/
 
                             }
                         }

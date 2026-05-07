@@ -1,9 +1,12 @@
-package com.example.zilean
+package com.example.zilean.ui
 
+import android.content.res.Configuration
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -16,11 +19,24 @@ import androidx.compose.ui.unit.sp
 import com.example.zilean.ui.theme.ZileanTheme
 
 @Composable
-fun HealthDashboard(proteinGoal: Int,
+/*fun HealthDashboard(proteinGoal: Int,
                     caloriesGoal: Int,
                     carbsGoal: Int,
                     fatsGoal: Int
-                    ) {
+                    ) {*/
+fun HealthDashboard(
+    name: String?,
+    currentProtein: Int,
+    proteinGoal: Int,
+    onAddFoodClick: () -> Unit,
+    currentCalories: Int,
+    currentCarb: Int,
+    currentFat: Int,
+    caloriesGoal: Int,
+    carbsGoal: Int,
+    fatsGoal: Int
+){
+    val progress = (currentCalories * 100) / caloriesGoal
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -38,14 +54,15 @@ fun HealthDashboard(proteinGoal: Int,
             ) {
                 Box(contentAlignment = Alignment.Center) {
                     CircularProgressIndicator(
-                        progress = 0.65f,
+                        //progress = 0.65f,
+                        progress = progress.toFloat() / 100,
                         modifier = Modifier.size(100.dp),
                         color = MaterialTheme.colorScheme.primary,
                         strokeWidth = 8.dp,
                         trackColor = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                     Text(
-                        "65%",
+                        progress.toString() + "%",
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         fontWeight = FontWeight.Bold,
                         fontSize = 28.sp
@@ -58,13 +75,13 @@ fun HealthDashboard(proteinGoal: Int,
                     Text("Preostalo", color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 14.sp)
                     Row (verticalAlignment = Alignment.Bottom, horizontalArrangement = Arrangement.spacedBy(4.dp)){
                         Text(
-                            "0",
+                            currentCalories.toString(),
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                             fontSize = 36.sp,
                             fontWeight = FontWeight.Bold
                         )
                         Text(
-                            "/" + caloriesGoal.toString(),
+                            "/"  + caloriesGoal.toString(),
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                             fontSize = 18.sp,
                             fontWeight = FontWeight.Normal
@@ -84,23 +101,26 @@ fun HealthDashboard(proteinGoal: Int,
         ) {
             MacroCard(
                 label = "Hidrati",
-                value = "0",
-                value2 = carbsGoal.toString() + "g",
+                value = currentCarb.toString(),
+                //value2 = carbsGoal.toString() + "g",
+                value2 = carbsGoal.toString(),
                 //icon = Icons.Default.WaterDrop,
                 color = Color(0xFF3B82F6),
                 modifier = Modifier.weight(1f)
             )
             MacroCard(
                 label = "Proteini",
-                value = "0",
-                value2 = proteinGoal.toString() + "g",
+                value = currentProtein.toString(),
+                //value2 = proteinGoal.toString() + "g",
+                value2 = proteinGoal.toString(),
                 //icon = Icons.Default.Star,
                 color = Color(0xFFc40404),
                 modifier = Modifier.weight(1f)
             )
             MacroCard(
                 label = "Masti",
-                value = "0",
+                value = currentFat.toString(),
+                //value2 = fatsGoal.toString(),
                 value2 = fatsGoal.toString(),
                 color = Color(0xFFFACC15),
                 modifier = Modifier.weight(1f)
@@ -108,6 +128,20 @@ fun HealthDashboard(proteinGoal: Int,
         }
 
         Spacer(modifier = Modifier.height(24.dp))
+
+        Button(
+            onClick = onAddFoodClick,
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(56.dp),
+            shape = RoundedCornerShape(12.dp)
+        ) {
+            Icon(Icons.Default.Add, contentDescription = null)
+            Spacer(modifier = Modifier.width(8.dp))
+            Text(text = "Dodaj obrok", fontSize = 24.sp)
+        }
+
+
 
         /*Button(
             onClick = {  },
@@ -188,7 +222,7 @@ fun DashboardLightPreview() {
     }
 }
 
-@Preview(name = "Dark Mode", showBackground = true, uiMode = android.content.res.Configuration.UI_MODE_NIGHT_YES)
+@Preview(name = "Dark Mode", showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
 fun DashboardDarkPreview() {
     ZileanTheme(darkTheme = true) {

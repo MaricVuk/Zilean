@@ -1,0 +1,28 @@
+# Project exclude paths
+# interna podesavanja
+.idea/
+*.iml
+*.iws
+*.ipr
+
+# Build fajlovi
+build/
+app/build/
+.gradle/
+local.properties
+
+# Android
+capture/
+output.json
+
+# Kes i logovi
+.DS_Store
+/captures/
+*.log
+
+# Baze podataka
+*.db
+*.db-journal
+
+# Eks folderi
+.navigation/

@@ -9,23 +9,12 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.runtime.setValue
-import androidx.compose.runtime.getValue
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.zilean.data.ProductMetadata
-import com.example.zilean.ui.AddFoodDialog
-import com.example.zilean.ui.FoodViewModel
-import com.example.zilean.ui.HealthDashboard
-import com.example.zilean.ui.MealMenuScreen
-import com.example.zilean.ui.SetupScreen
-
+import com.example.zilean.ui.*
 import com.example.zilean.ui.theme.ZileanTheme
 
 class MainActivity : ComponentActivity() {
@@ -37,7 +26,18 @@ class MainActivity : ComponentActivity() {
         val isSetupDone = sharedPref.getBoolean("is_setup_done", false)
 
         setContent {
-            ZileanTheme {
+
+            var isDarkMode by remember {
+                mutableStateOf(sharedPref.getBoolean("is_dark_mode", false))
+            }
+
+            val toggleTheme: (Boolean) -> Unit = { dark ->
+                isDarkMode = dark
+                sharedPref.edit().putBoolean("is_dark_mode", dark).apply()
+            }
+
+            ZileanTheme (darkTheme = isDarkMode) {
+
                 var currentScreen by remember {
                     mutableStateOf(if (isSetupDone) "dashboard" else "setup")
                 }
@@ -87,6 +87,17 @@ class MainActivity : ComponentActivity() {
                                 )
 
                             }
+
+                            else if(currentScreen == "settings"){
+                                SettingsScreen(
+                                    name = userName,
+                                    onBack = {currentScreen = "dashboard"},
+                                    isDarkMode = isDarkMode,
+                                    onThemeToggle = {
+                                        newValue -> isDarkMode = newValue
+                                        sharedPref.edit().putBoolean("is_dark_mode", newValue).apply()
+                                    },
+                                )                            }
 
 
 
@@ -167,7 +178,8 @@ class MainActivity : ComponentActivity() {
                                         }
                                     },
                                     onMenuClick = { currentScreen = "jelovnik" },
-                                    onEditEntry = { entry -> viewModel.editFoodEntry(entry) }
+                                    onEditEntry = { entry -> viewModel.editFoodEntry(entry) },
+                                    onSettingsClick = {currentScreen = "settings" }
                                 )
 
                             }

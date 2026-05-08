@@ -19,6 +19,7 @@ class FoodViewModel(application: Application) : AndroidViewModel(application) {
 
     val allFood: Flow<List<FoodEntry>> = dao.getAllFood()
     val allPresets: Flow<List<MealPreset>> = dao.getAllPresets()
+    val allProducts: Flow<List<ProductMetadata>> = dao.getAllProducts()
 
     fun addFood(name: String, protein: Int, calories: Int, carbs: Int, fats: Int) {
         viewModelScope.launch {
@@ -128,6 +129,7 @@ class FoodViewModel(application: Application) : AndroidViewModel(application) {
             dao.updateFoodEntry(entry)
         }
     }
+
 
 
 }

@@ -13,6 +13,7 @@ import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.QrCodeScanner
 import androidx.compose.material.icons.filled.List
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.*
 import androidx.compose.material3.OutlinedTextFieldDefaults.contentPadding
 import androidx.compose.runtime.Composable
@@ -53,7 +54,9 @@ fun HealthDashboard(
     onDeleteEntry: (FoodEntry) -> Unit,
     onScanClick: () -> Unit,
     onMenuClick: () -> Unit,
-    onEditEntry: (FoodEntry) -> Unit
+    onEditEntry: (FoodEntry) -> Unit,
+    onSettingsClick: () -> Unit,
+
 ) {
     val progress = if (caloriesGoal > 0) (currentCalories * 100) / caloriesGoal else 0
     var editingEntry by remember { mutableStateOf<FoodEntry?>(null) }
@@ -174,7 +177,7 @@ fun HealthDashboard(
             Button(
                 onClick = onAddFoodClick,
                 modifier = Modifier
-                    .fillMaxWidth(0.6f)
+                    .fillMaxWidth(0.2f)
                     .height(64.dp),
                 shape = RoundedCornerShape(12.dp)
             ) {
@@ -192,7 +195,7 @@ fun HealthDashboard(
 
             FilledIconButton(
                 onClick = onMenuClick,
-                modifier = Modifier.size(64.dp).fillMaxWidth(0.6f),
+                modifier = Modifier.size(64.dp).fillMaxWidth(0.2f),
                 shape = RoundedCornerShape(12.dp),
                 colors = IconButtonDefaults.filledIconButtonColors(
                     containerColor = MaterialTheme.colorScheme.primary
@@ -224,6 +227,24 @@ fun HealthDashboard(
                 )
             }
 
+            Spacer(modifier = Modifier.width(1.dp))
+
+            FilledIconButton(
+                onClick = onSettingsClick,
+                modifier = Modifier.size(64.dp).fillMaxWidth(0.2f),
+                shape = RoundedCornerShape(12.dp),
+                colors = IconButtonDefaults.filledIconButtonColors(
+                    containerColor = MaterialTheme.colorScheme.primary
+                ),
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Settings,
+                    contentDescription = "Settings",
+                    Modifier.size(44.dp),
+                    tint = MaterialTheme.colorScheme.onSurface
+                )
+            }
+
         }
 
 
@@ -231,12 +252,15 @@ fun HealthDashboard(
         Spacer(modifier = Modifier.height(16.dp))
         Text(text = "Danasnji obroci:", style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.onSurface)
 
-        LazyColumn(modifier = Modifier.fillMaxSize(), contentPadding = PaddingValues(bottom = 16.dp)) {
+        LazyColumn(
+            modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background),
+            contentPadding = PaddingValues(bottom = 16.dp),
+            ) {
             items(foodList) { currentEntry ->
                 FoodItemRow(
                     entry = currentEntry,
                     onDelete = { onDeleteEntry(currentEntry) },
-                    onEdit = { editingEntry = currentEntry } ,
+                    onEdit = { editingEntry = currentEntry },
                 )
             }
         }
@@ -323,6 +347,8 @@ fun DashboardLightPreview() {
             onScanClick = {true},
             onMenuClick = {true},
             onEditEntry = {true},
+            onSettingsClick = {true},
+
         )
     }
 }
@@ -348,6 +374,8 @@ fun DashboardDarkPreview() {
             onScanClick = {true},
             onMenuClick = {true},
             onEditEntry = {true},
+            onSettingsClick = {true},
+
         )
     }
 }

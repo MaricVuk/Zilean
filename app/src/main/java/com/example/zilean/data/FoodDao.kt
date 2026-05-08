@@ -2,6 +2,9 @@ package com.example.zilean.data
 
 import androidx.room.*
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import java.time.LocalDate
 
 @Dao
 interface FoodDao {
@@ -41,6 +44,9 @@ interface FoodDao {
     @Query("SELECT * FROM meal_presets ORDER BY name ASC")
     fun getAllPresets(): Flow<List<MealPreset>>
 
+    @Query("SELECT * FROM product_metadata ORDER BY name ASC")
+    fun getAllProducts(): Flow<List<ProductMetadata>>
+
     @Delete
     suspend fun deletePreset(preset: MealPreset)
 
@@ -52,5 +58,6 @@ interface FoodDao {
 
     @Update
     suspend fun updateProductMetadata(product: ProductMetadata)
+
 
 }

@@ -23,10 +23,13 @@ interface FoodDao {
     @Query ("SELECT SUM(fats) FROM food_entries WHERE date >= :startOfDay AND date < :endOfDay")
     fun getFatsForDate(startOfDay: Long, endOfDay: Long): Flow<Int?>
 
-    @Query ("SELECT SUM(carbs) FROM food_entries WHERE date >= :startOfDay AND date < :endOfDay")
+    @Query("SELECT SUM(carbs) FROM food_entries WHERE date >= :startOfDay AND date < :endOfDay")
     fun getCarbsForDate(startOfDay: Long, endOfDay: Long): Flow<Int?>
 
-    @Query("SELECT * FROM food_entries WHERE date >= :startOfDay AND date < :endOfDay ORDER BY date DESC")
+    @Query("SELECT SUM(water) FROM food_entries WHERE date >= :startOfDay AND date < :endOfDay AND isWater = 1")
+    fun getWaterForDate(startOfDay: Long, endOfDay: Long): Flow<Int?>
+
+    @Query("SELECT * FROM food_entries WHERE date >= :startOfDay AND date < :endOfDay AND isWater = 0 ORDER BY date DESC")
     fun getFoodListForDate(startOfDay: Long, endOfDay: Long): Flow<List<FoodEntry>>
 
     @Query("DELETE FROM food_entries WHERE id = :entryId")

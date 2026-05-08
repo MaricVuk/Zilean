@@ -57,7 +57,7 @@ fun SettingsScreen(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text("Tamni režim")
+                    Text("Tamni rezim")
                     Switch(
                         checked = isDarkMode,
                         onCheckedChange = { newValue ->

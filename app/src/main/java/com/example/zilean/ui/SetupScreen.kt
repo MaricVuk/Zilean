@@ -10,12 +10,13 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 
 @Composable
-fun SetupScreen(onSetupComplete: (String, String, String, String, String) -> Unit) {
+fun SetupScreen(onSetupComplete: (String, String, String, String, String, String) -> Unit) {
     var name by remember { mutableStateOf("") }
     var calories by remember { mutableStateOf("") }
     var protein by remember { mutableStateOf("") }
     var carbs by remember { mutableStateOf("") }
     var fats by remember { mutableStateOf("") }
+    var water by remember { mutableStateOf("") }
 
     Surface(
         modifier = Modifier.fillMaxSize(),
@@ -78,14 +79,24 @@ fun SetupScreen(onSetupComplete: (String, String, String, String, String) -> Uni
                 singleLine = true
             )
 
+
+            OutlinedTextField(
+                value = water,
+                onValueChange = { water = it },
+                label = { Text("Cilj vode (u ml)") },
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                modifier = Modifier.fillMaxWidth(),
+                singleLine = true
+            )
+
             Spacer(modifier = Modifier.weight(1f))
 
             Button(
-                onClick = { onSetupComplete(name, calories, protein, carbs, fats) },
+                onClick = { onSetupComplete(name, calories, protein, carbs, fats, water) },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(56.dp),
-                enabled = name.isNotBlank() && calories.isNotBlank() && protein.isNotBlank()
+                enabled = name.isNotBlank() && calories.isNotBlank() && protein.isNotBlank() && carbs.isNotBlank() && fats.isNotBlank() && water.isNotBlank()
             ) {
                 Text("SACUVAJ I KRENI")
             }

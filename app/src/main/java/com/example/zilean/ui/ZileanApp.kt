@@ -7,8 +7,9 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.zilean.data.FoodEntry
+import com.example.zilean.data.MealPreset
 import com.example.zilean.data.ProductMetadata
-import com.example.zilean.ui.*
 
 @Composable
 fun ZileanApp(
@@ -20,18 +21,21 @@ fun ZileanApp(
     goalCal: Int,
     goalCarb: Int,
     goalFat: Int,
-    onSaveUserData: (String, String, String, String, String) -> Unit
+    onSaveUserData: (String, String, String, String, String, String) -> Unit,
+    goalWater: Int,
 ) {
     var currentScreen by remember {
         mutableStateOf(if (isSetupDone) "dashboard" else "setup")
     }
 
+    val viewModel: FoodViewModel = viewModel()
+
     Scaffold { innerPadding ->
-        val viewModel: FoodViewModel = viewModel()
         val todaysProtein by viewModel.getTodaysProtein().collectAsState(initial = 0)
         val todaysCalories by viewModel.getTodaysCalories().collectAsState(initial = 0)
         val todaysCarbs by viewModel.getTodaysCarbs().collectAsState(initial = 0)
         val todaysFats by viewModel.getTodaysFats().collectAsState(initial = 0)
+        val todaysWater by viewModel.getTodaysWater().collectAsState(initial = 0)
         val foodList by viewModel.getTodaysFoodEntries().collectAsState(initial = emptyList())
         val selectedDate by viewModel.selectedDate.collectAsState()
 
@@ -44,8 +48,8 @@ fun ZileanApp(
         Box(modifier = Modifier.padding(innerPadding)) {
             when (currentScreen) {
                 "setup" -> {
-                    SetupScreen(onSetupComplete = { name, cal, prot, carb, fat ->
-                        onSaveUserData(name, cal, prot, carb, fat)
+                    SetupScreen(onSetupComplete = { name, cal, prot, carb, fat, water ->
+                        onSaveUserData(name, cal, prot, carb, fat, water)
                         currentScreen = "dashboard"
                     })
                 }
@@ -122,6 +126,9 @@ fun ZileanApp(
                         caloriesGoal = goalCal,
                         carbsGoal = goalCarb,
                         fatsGoal = goalFat,
+                        waterGoal = goalWater,
+                        currentWater = todaysWater ?: 0,
+                        onAddWater = { amount -> viewModel.addWater(amount) },
                         foodList = foodList,
                         onAddFoodClick = { showDialog = true },
                         onDeleteEntry = { entry -> viewModel.deleteEntry(entry) },

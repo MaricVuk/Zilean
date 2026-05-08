@@ -18,6 +18,69 @@ import androidx.compose.ui.unit.dp
 import com.example.zilean.data.FoodEntry
 import java.text.SimpleDateFormat
 import java.util.*
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.ui.text.input.KeyboardType
+
+@Composable
+fun AddWaterDialog(
+    onDismiss: () -> Unit,
+    onConfirm: (Int) -> Unit
+) {
+    var amount by remember { mutableStateOf("250") }
+    var showError by remember { mutableStateOf(false) }
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(text = "Unesi kolicinu vode", fontWeight = FontWeight.Bold) },
+        text = {
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                OutlinedTextField(
+                    value = amount,
+                    onValueChange = {
+                        if (it.all { char -> char.isDigit() }) {
+                            amount = it
+                            showError = false
+                        }
+                    },
+                    isError = showError,
+                    label = { Text("Kolicina (ml)") },
+                    modifier = Modifier.fillMaxWidth(),
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                    singleLine = true
+                )
+                if (showError) {
+                    Text(
+                        text = "Unesi ispravnu kolicinu.",
+                        color = MaterialTheme.colorScheme.error,
+                        style = MaterialTheme.typography.labelSmall
+                    )
+                }
+            }
+        },
+        confirmButton = {
+            Button(
+                onClick = {
+                    val waterAmount = amount.toIntOrNull()
+                    if (waterAmount != null && waterAmount > 0) {
+                        onConfirm(waterAmount)
+                    } else {
+                        showError = true
+                    }
+                }
+            ) {
+                Text("Dodaj")
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text("Otkazi")
+            }
+        }
+    )
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -48,7 +111,7 @@ fun CalendarHeader(
             },
             dismissButton = {
                 TextButton(onClick = { showDatePicker = false }) {
-                    Text("Otkaži")
+                    Text("Otkazi")
                 }
             }
         ) {
@@ -78,7 +141,7 @@ fun CalendarHeader(
         )
 
         IconButton(onClick = onNextDay) {
-            Icon(Icons.AutoMirrored.Filled.ArrowForward, contentDescription = "Sledeći dan")
+            Icon(Icons.AutoMirrored.Filled.ArrowForward, contentDescription = "Sledeci dan")
         }
     }
 }

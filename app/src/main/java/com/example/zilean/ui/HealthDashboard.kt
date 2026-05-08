@@ -7,12 +7,14 @@ import androidx.compose.animation.core.animateIntAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.LocalDrink
 import androidx.compose.material.icons.filled.QrCodeScanner
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.*
@@ -31,6 +33,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.zilean.data.FoodEntry
 import com.example.zilean.ui.theme.ZileanTheme
+import java.util.Calendar
 
 @Composable
 fun HealthDashboard(
@@ -50,13 +53,27 @@ fun HealthDashboard(
     onMenuClick: () -> Unit,
     onEditEntry: (FoodEntry) -> Unit,
     onSettingsClick: () -> Unit,
-    selectedDate: java.util.Calendar,
-    onDateChange: (java.util.Calendar) -> Unit,
+    selectedDate: Calendar,
+    onDateChange: (Calendar) -> Unit,
     onPreviousDay: () -> Unit,
-    onNextDay: () -> Unit
+    onNextDay: () -> Unit,
+    waterGoal: Int,
+    currentWater: Int,
+    onAddWater: (Int) -> Unit
 ) {
     val progress = if (caloriesGoal > 0) (currentCalories * 100) / caloriesGoal else 0
     var editingEntry by remember { mutableStateOf<FoodEntry?>(null) }
+    var showWaterDialog by remember { mutableStateOf(false) }
+
+    if (showWaterDialog) {
+        AddWaterDialog(
+            onDismiss = { showWaterDialog = false },
+            onConfirm = { amount ->
+                onAddWater(amount)
+                showWaterDialog = false
+            }
+        )
+    }
 
 
     val animatedCalories by animateIntAsState(
@@ -126,7 +143,7 @@ fun HealthDashboard(
                 Box(contentAlignment = Alignment.Center) {
 
                     CircularProgressIndicator(
-                        progress = { animatedProgress },
+                        progress = animatedProgress,
                         modifier = Modifier.size(100.dp),
                         color = MaterialTheme.colorScheme.primary,
                         strokeWidth = 8.dp,
@@ -198,78 +215,89 @@ fun HealthDashboard(
 
 
 
-        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            Button(
-                onClick = onAddFoodClick,
-                modifier = Modifier
-                    .fillMaxWidth(0.2f)
-                    .height(64.dp),
-                shape = RoundedCornerShape(12.dp)
-            ) {
-                Spacer(modifier = Modifier.width(8.dp))
-                Text(
-                    text = "Dodaj obrok",
-                    fontSize = 28.sp,
-                    color = MaterialTheme.colorScheme.onSurface,
-                    fontWeight = FontWeight.Bold,
-                )
+
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            WaterCard(modifier = Modifier.weight(1f), currentWater = currentWater, waterGoal = waterGoal, onAddWater = { showWaterDialog = true })
+
+            Column(modifier = Modifier, horizontalAlignment = Alignment.End) {
+                Row(modifier = Modifier, horizontalArrangement = Arrangement.End) {
+                    FilledIconButton(
+                        onClick = onMenuClick,
+                        modifier = Modifier.size(64.dp),
+                        shape = RoundedCornerShape(12.dp),
+                        colors = IconButtonDefaults.filledIconButtonColors(
+                            containerColor = MaterialTheme.colorScheme.primary
+                        )
+                    ) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.List,
+                            tint = MaterialTheme.colorScheme.onSurface,
+                            modifier = Modifier.size(50.dp),
+                            contentDescription = "Otvori jelovnik"
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.width(12.dp))
+
+                    FilledIconButton(
+                        onClick = onAddFoodClick,
+                        modifier = Modifier
+                            .height(64.dp)
+                            .width(64.dp),
+                        shape = RoundedCornerShape(12.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Add,
+                            tint = MaterialTheme.colorScheme.onSurface,
+                            modifier = Modifier.size(50.dp),
+                            contentDescription = "Dodaj novo"
+                        )
+                    }
+
+                }
+                Spacer(modifier = Modifier.height(12.dp))
+                Row(modifier = Modifier, horizontalArrangement = Arrangement.End) {
+                    FilledIconButton(
+                        onClick = onScanClick,
+                        modifier = Modifier.size(64.dp).fillMaxWidth(0.2f),
+                        shape = RoundedCornerShape(12.dp),
+                        colors = IconButtonDefaults.filledIconButtonColors(
+                            containerColor = MaterialTheme.colorScheme.primary
+                        ),
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.QrCodeScanner,
+                            contentDescription = "Skeniraj bar-kod",
+                            Modifier.size(50.dp),
+                            tint = MaterialTheme.colorScheme.onSurface
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.width(12.dp))
+
+                    FilledIconButton(
+                        onClick = onSettingsClick,
+                        modifier = Modifier.size(64.dp),
+                        shape = RoundedCornerShape(12.dp),
+                        colors = IconButtonDefaults.filledIconButtonColors(
+                            containerColor = MaterialTheme.colorScheme.primary
+                        ),
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Settings,
+                            contentDescription = "Settings",
+                            Modifier.size(50.dp),
+                            tint = MaterialTheme.colorScheme.onSurface
+                        )
+                    }
+                }
             }
-
-            Spacer(modifier = Modifier.width(1.dp))
-
-            FilledIconButton(
-                onClick = onMenuClick,
-                modifier = Modifier.size(64.dp).fillMaxWidth(0.2f),
-                shape = RoundedCornerShape(12.dp),
-                colors = IconButtonDefaults.filledIconButtonColors(
-                    containerColor = MaterialTheme.colorScheme.primary
-                )
-            ) {
-                Icon(
-                    imageVector = Icons.AutoMirrored.Filled.List,
-                    tint = MaterialTheme.colorScheme.onSurface,
-                    modifier = Modifier.size(44.dp),
-                    contentDescription = "Otvori jelovnik"
-                )
-            }
-
-            Spacer(modifier = Modifier.width(1.dp))
-
-            FilledIconButton(
-                onClick = onScanClick,
-                modifier = Modifier.size(64.dp).fillMaxWidth(0.2f),
-                shape = RoundedCornerShape(12.dp),
-                colors = IconButtonDefaults.filledIconButtonColors(
-                    containerColor = MaterialTheme.colorScheme.primary
-                ),
-            ) {
-                Icon(
-                    imageVector = Icons.Default.QrCodeScanner,
-                    contentDescription = "Skeniraj bar-kod",
-                    Modifier.size(44.dp),
-                    tint = MaterialTheme.colorScheme.onSurface
-                )
-            }
-
-            Spacer(modifier = Modifier.width(1.dp))
-
-            FilledIconButton(
-                onClick = onSettingsClick,
-                modifier = Modifier.size(64.dp).fillMaxWidth(0.2f),
-                shape = RoundedCornerShape(12.dp),
-                colors = IconButtonDefaults.filledIconButtonColors(
-                    containerColor = MaterialTheme.colorScheme.primary
-                ),
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Settings,
-                    contentDescription = "Settings",
-                    Modifier.size(44.dp),
-                    tint = MaterialTheme.colorScheme.onSurface
-                )
-            }
-
         }
+
 
         Spacer(modifier = Modifier.height(16.dp))
 
@@ -298,6 +326,77 @@ fun HealthDashboard(
     }
 }
 
+
+@Composable
+fun WaterCard(
+    currentWater: Int,
+    waterGoal: Int,
+    onAddWater: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val animatedWater by animateIntAsState(
+        targetValue = currentWater,
+        animationSpec = tween(durationMillis = 1000, easing = FastOutSlowInEasing),
+        label = "WaterAnimation"
+    )
+
+    Card(
+        modifier = modifier.fillMaxWidth().height(140.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        shape = RoundedCornerShape(16.dp),
+
+    ) {
+        Row(
+            modifier = Modifier.padding(16.dp).fillMaxSize(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+
+            Column {
+                Text(
+                    text = "Voda",
+                    color = Color(0xFF34D399),
+                    fontSize = 24.sp,
+                    fontWeight = FontWeight.Bold
+                )
+
+                Row(verticalAlignment = Alignment.Bottom) {
+                    Text(
+                        text = animatedWater.toString(),
+                        fontSize = 24.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                    Text(
+                        text = " /$waterGoal",
+                        fontSize = 14.sp,
+                        modifier = Modifier,//.padding(start = 4.dp, bottom = 2.dp),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.width(8.dp))
+
+            IconButton(
+                onClick = onAddWater,
+                modifier = Modifier
+                    .background(
+                        color = Color(0xFF34D399).copy(alpha = 0.2f),
+                        shape = RoundedCornerShape(64.dp),
+                    ).size(80.dp)
+
+            ) {
+                Icon(
+                    imageVector = Icons.Default.LocalDrink,
+                    contentDescription = "Dodaj vodu",
+                    tint = Color(0xFF34D399),
+                    modifier = Modifier.size(54.dp)
+                )
+            }
+        }
+    }
+}
 @Composable
 fun MacroCard(
     label: String,
@@ -361,10 +460,13 @@ fun DashboardLightPreview() {
             caloriesGoal = 2750,
             carbsGoal = 600,
             fatsGoal = 80,
+            waterGoal = 2000,
+            currentWater = 1000,
+            onAddWater = { },
             foodList = emptyList(),
-            onAddFoodClick = { true },
-            onDeleteEntry = {true },
-            onScanClick = {true},
+            onAddFoodClick = { },
+            onDeleteEntry = { },
+            onScanClick = { },
             onMenuClick = { },
             onEditEntry = { },
             onSettingsClick = { },
@@ -391,10 +493,13 @@ fun DashboardDarkPreview() {
             caloriesGoal = 2750,
             carbsGoal = 600,
             fatsGoal = 80,
+            waterGoal = 2000,
+            currentWater = 1000,
+            onAddWater = { },
             foodList = emptyList(),
-            onAddFoodClick = { true },
-            onDeleteEntry = {true },
-            onScanClick = {true},
+            onAddFoodClick = { },
+            onDeleteEntry = { },
+            onScanClick = { },
             onMenuClick = { },
             onEditEntry = { },
             onSettingsClick = { },

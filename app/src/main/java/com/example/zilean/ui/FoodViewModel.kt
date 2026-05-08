@@ -87,10 +87,32 @@ class FoodViewModel(application: Application) : AndroidViewModel(application) {
         dao.getFatsForDate(startOfDay, endOfDay)
     }
 
+    fun getTodaysWater(): Flow<Int?> = _selectedDate.flatMapLatest { date ->
+        val startOfDay = date.timeInMillis
+        val endOfDay = startOfDay + 24 * 60 * 60 * 1000
+        dao.getWaterForDate(startOfDay, endOfDay)
+    }
+
     fun getTodaysFoodEntries(): Flow<List<FoodEntry>> = _selectedDate.flatMapLatest { date ->
         val startOfDay = date.timeInMillis
         val endOfDay = startOfDay + 24 * 60 * 60 * 1000
         dao.getFoodListForDate(startOfDay, endOfDay)
+    }
+
+    fun addWater(amount: Int) {
+        viewModelScope.launch {
+            val newEntry = FoodEntry(
+                name = "Voda",
+                calories = 0,
+                protein = 0,
+                carbs = 0,
+                fats = 0,
+                water = amount,
+                isWater = true,
+                date = _selectedDate.value.timeInMillis + (System.currentTimeMillis() % (24 * 60 * 60 * 1000))
+            )
+            dao.insertFood(newEntry)
+        }
     }
 
     fun deleteEntry(entry: FoodEntry) {

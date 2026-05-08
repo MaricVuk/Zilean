@@ -11,5 +11,7 @@ data class FoodEntry(
     val protein: Int,
     val carbs: Int,
     val fats: Int,
+    val water: Int = 0,
+    val isWater: Boolean = false,
     val date: Long = System.currentTimeMillis()
 )

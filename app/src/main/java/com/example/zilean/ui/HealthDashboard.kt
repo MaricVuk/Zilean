@@ -1,10 +1,8 @@
 package com.example.zilean.ui
 
-import android.R
 import android.content.res.Configuration
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -12,10 +10,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.QrCodeScanner
-import androidx.compose.material.icons.filled.List
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.*
-import androidx.compose.material3.OutlinedTextFieldDefaults.contentPadding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -28,15 +24,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.zilean.data.FoodEntry
 import com.example.zilean.ui.theme.ZileanTheme
-
-/*fun HealthDashboard(proteinGoal: Int,
-                    caloriesGoal: Int,
-                    carbsGoal: Int,
-                    fatsGoal: Int
-                    ) {*/
 
 @Composable
 fun HealthDashboard(
@@ -55,8 +44,7 @@ fun HealthDashboard(
     onScanClick: () -> Unit,
     onMenuClick: () -> Unit,
     onEditEntry: (FoodEntry) -> Unit,
-    onSettingsClick: () -> Unit,
-
+    onSettingsClick: () -> Unit
 ) {
     val progress = if (caloriesGoal > 0) (currentCalories * 100) / caloriesGoal else 0
     var editingEntry by remember { mutableStateOf<FoodEntry?>(null) }
@@ -144,25 +132,20 @@ fun HealthDashboard(
             MacroCard(
                 label = "Hidrati",
                 value = currentCarb.toString(),
-                //value2 = carbsGoal.toString() + "g",
                 value2 = carbsGoal.toString(),
-                //icon = Icons.Default.WaterDrop,
                 color = Color(0xFF3B82F6),
                 modifier = Modifier.weight(1f)
             )
             MacroCard(
                 label = "Proteini",
                 value = currentProtein.toString(),
-                //value2 = proteinGoal.toString() + "g",
                 value2 = proteinGoal.toString(),
-                //icon = Icons.Default.Star,
                 color = Color(0xFFc40404),
                 modifier = Modifier.weight(1f)
             )
             MacroCard(
                 label = "Masti",
                 value = currentFat.toString(),
-                //value2 = fatsGoal.toString(),
                 value2 = fatsGoal.toString(),
                 color = Color(0xFFFACC15),
                 modifier = Modifier.weight(1f)
@@ -181,7 +164,6 @@ fun HealthDashboard(
                     .height(64.dp),
                 shape = RoundedCornerShape(12.dp)
             ) {
-                //Icon(Icons.Default.Add, contentDescription = null)
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
                     text = "Dodaj obrok",
@@ -281,10 +263,6 @@ fun MacroCard(
         shape = RoundedCornerShape(16.dp)
     ) {
         Column(modifier = Modifier.padding(12.dp)) {
-            //Divider(color = color, thickness = 3.dp, modifier = Modifier.width(20.dp))
-
-            //Spacer(modifier = Modifier.height(8.dp))
-
             Text(
                 text = label,
                 color = color,
@@ -318,13 +296,6 @@ fun MacroCard(
         }
     }
 }
-
-/*@Preview(showBackground = true, backgroundColor = 0xFF000000)
-@Composable
-fun DashboardPreview() {
-    HealthDashboard()
-}*/
-
 
 @Preview(name = "Light Mode", showBackground = true)
 @Composable

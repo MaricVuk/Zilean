@@ -1,7 +1,6 @@
 package com.example.zilean.ui
 
 import android.R
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -14,7 +13,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.tooling.preview.Preview
 import com.example.zilean.data.FoodEntry
 
 @Composable
@@ -42,7 +40,6 @@ fun FoodItemRow(entry: FoodEntry, onDelete: () -> Unit, onEdit: () -> Unit) {
     Card(
         modifier = Modifier.fillMaxWidth().
         padding(vertical = 12.dp),
-        //.background(MaterialTheme.colorScheme.primary),
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
     ) {
@@ -53,7 +50,7 @@ fun FoodItemRow(entry: FoodEntry, onDelete: () -> Unit, onEdit: () -> Unit) {
             Column (modifier = Modifier.weight(1f)){
                 Text(text = entry.name, fontWeight = FontWeight.Bold, style = MaterialTheme.typography.titleLarge)
                 Text(
-                    text = "| ${entry.calories} kcal | P:${entry.protein}g | H:${entry.carbs}g | M:${entry.fats}g",
+                    text = "${entry.calories} kcal | P:${entry.protein}g | C:${entry.carbs}g | F:${entry.fats}g",
                     style = MaterialTheme.typography.bodyMedium
                 )
             }

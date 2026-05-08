@@ -29,7 +29,7 @@ fun SetupScreen(onSetupComplete: (String, String, String, String, String) -> Uni
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             Text(
-                text = "Dobrodošli u Zilean",
+                text = "Dobrodosli u Zilean",
                 style = MaterialTheme.typography.headlineMedium,
                 color = MaterialTheme.colorScheme.onBackground
             )
@@ -87,7 +87,7 @@ fun SetupScreen(onSetupComplete: (String, String, String, String, String) -> Uni
                     .height(56.dp),
                 enabled = name.isNotBlank() && calories.isNotBlank() && protein.isNotBlank()
             ) {
-                Text("SAČUVAJ I KRENI")
+                Text("SACUVAJ I KRENI")
             }
         }
     }

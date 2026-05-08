@@ -6,6 +6,7 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.zilean.data.AppDatabase
 import com.example.zilean.data.FoodEntry
+import com.example.zilean.data.MealPreset
 import com.example.zilean.data.ProductMetadata
 import com.google.mlkit.vision.codescanner.GmsBarcodeScanning
 import kotlinx.coroutines.flow.Flow
@@ -17,6 +18,7 @@ class FoodViewModel(application: Application) : AndroidViewModel(application) {
 
 
     val allFood: Flow<List<FoodEntry>> = dao.getAllFood()
+    val allPresets: Flow<List<MealPreset>> = dao.getAllPresets()
 
     fun addFood(name: String, protein: Int, calories: Int, carbs: Int, fats: Int) {
         viewModelScope.launch {
@@ -100,6 +102,30 @@ class FoodViewModel(application: Application) : AndroidViewModel(application) {
     fun saveProductMetadata(product: ProductMetadata) {
         viewModelScope.launch {
             dao.insertProductMetadata(product)
+        }
+    }
+
+    fun addPreset(name: String, protein: Int, calories: Int, carbs: Int, fats: Int) {
+        viewModelScope.launch {
+            dao.insertPreset(MealPreset(name = name, protein = protein, calories = calories, carbs = carbs, fats = fats))
+        }
+    }
+
+    fun deletePreset(preset: MealPreset) {
+        viewModelScope.launch {
+            dao.deletePreset(preset)
+        }
+    }
+
+    fun editPreset(preset: MealPreset) {
+        viewModelScope.launch {
+            dao.updatePreset(preset)
+        }
+    }
+
+    fun editFoodEntry(entry: FoodEntry) {
+        viewModelScope.launch {
+            dao.updateFoodEntry(entry)
         }
     }
 

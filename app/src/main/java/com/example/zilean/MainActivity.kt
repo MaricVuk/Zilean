@@ -23,6 +23,7 @@ import com.example.zilean.data.ProductMetadata
 import com.example.zilean.ui.AddFoodDialog
 import com.example.zilean.ui.FoodViewModel
 import com.example.zilean.ui.HealthDashboard
+import com.example.zilean.ui.MealMenuScreen
 import com.example.zilean.ui.SetupScreen
 
 import com.example.zilean.ui.theme.ZileanTheme
@@ -43,68 +44,97 @@ class MainActivity : ComponentActivity() {
 
                 Surface(modifier = Modifier.fillMaxSize()) {
                     Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
+
+                        val userName = sharedPref.getString("user_name", "person")
+                        val goalProt = sharedPref.getInt("goal_protein", 190)
+                        val goalCal = sharedPref.getInt("goal_calories", 2000)
+                        val goalCarb = sharedPref.getInt("goal_carbs", 200)
+                        val goalFat = sharedPref.getInt("goal_fats", 70)
+
+                        val viewModel: FoodViewModel = viewModel()
+                        val todaysProtein by viewModel.getTodaysProtein().collectAsState(initial = 0)
+                        val todaysCalories by viewModel.getTodaysCalories().collectAsState(initial = 0)
+                        val todaysCarbs by viewModel.getTodaysCarbs().collectAsState(initial = 0)
+                        val todaysFats by viewModel.getTodaysFats().collectAsState(initial = 0)
+                        val foodList by viewModel.getTodaysFoodEntries().collectAsState(initial = emptyList())
+
+                        var showDialog by remember { mutableStateOf(false) }
+                        var scannedBarcode by remember { mutableStateOf<String?>(null) }
+                        var initialData by remember { mutableStateOf<ProductMetadata?>(null) }
+
+                        val context = LocalContext.current
+
                         Box(modifier = Modifier.padding(innerPadding)) {
                             if (currentScreen == "setup") {
                                 SetupScreen(onSetupComplete = { name, cal, prot, carb, fat ->
                                     saveUserData(name, cal, prot, carb, fat)
                                     currentScreen = "dashboard"
                                 })
-                            } else {
+                            }
 
-                                val userName = sharedPref.getString("user_name", "person")
-                                val goalProt = sharedPref.getInt("goal_protein", 190)
-                                val goalCal = sharedPref.getInt("goal_calories", 2000)
-                                val goalCarb = sharedPref.getInt("goal_carbs", 200)
-                                val goalFat = sharedPref.getInt("goal_fats", 70)
+                            else if (currentScreen == "jelovnik") {
+                                val presets by viewModel.allPresets.collectAsState(initial = emptyList())
+                                MealMenuScreen(
+                                    presets = presets,
+                                    onBack = { currentScreen = "dashboard" },
+                                    onDeletePreset = { preset -> viewModel.deletePreset(preset) },
+                                    onPresetSelected = { preset ->
+                                        viewModel.addFood(preset.name, preset.protein, preset.calories, preset.carbs, preset.fats)
 
-                                val viewModel: FoodViewModel = viewModel()
-                                val todaysProtein by viewModel.getTodaysProtein().collectAsState(initial = 0)
-                                val todaysCalories by viewModel.getTodaysCalories().collectAsState(initial = 0)
-                                val todaysCarbs by viewModel.getTodaysCarbs().collectAsState(initial = 0)
-                                val todaysFats by viewModel.getTodaysFats().collectAsState(initial = 0)
-                                val foodList by viewModel.getTodaysFoodEntries().collectAsState(initial = emptyList())
+                                        currentScreen = "dashboard"
+                                    },
+                                    viewModel = viewModel
+                                )
 
-                                var showDialog by remember { mutableStateOf(false) }
-                                var scannedBarcode by remember { mutableStateOf<String?>(null) }
-                                var initialData by remember { mutableStateOf<ProductMetadata?>(null) }
+                            }
 
-                                val context = LocalContext.current
+
+
+
+                            else {
 
                                 if (showDialog) {
-                                    AddFoodDialog(
-                                        initialName = initialData?.name ?: "",
-                                        initialProtein = initialData?.proteinPer100g?.toString() ?: "",
-                                        initialCalories = initialData?.caloriesPer100g?.toString() ?: "",
-                                        initialCarbs = initialData?.carbsPer100g?.toString() ?: "",
-                                        initialFats = initialData?.fatsPer100g?.toString() ?: "",
+                                    androidx.compose.runtime.key(scannedBarcode, initialData) {
+                                        AddFoodDialog(
+                                            initialName = initialData?.name ?: "",
+                                            initialProtein = initialData?.proteinPer100g?.toString() ?: "",
+                                            initialCalories = initialData?.caloriesPer100g?.toString() ?: "",
+                                            initialCarbs = initialData?.carbsPer100g?.toString() ?: "",
+                                            initialFats = initialData?.fatsPer100g?.toString() ?: "",
+                                            onDismiss = {
+                                                showDialog = false
+                                                initialData = null
+                                                scannedBarcode = null
+                                            },
+                                            onConfirm = { name, prot, cal, carb, fat, shouldSavePreset ->
+                                                viewModel.addFood(name, prot, cal, carb, fat)
 
-                                        onDismiss = {
-                                            showDialog = false
-                                            initialData = null
-                                            scannedBarcode = null
-                                        },
-                                        onConfirm = { name, prot, cal, carb, fat ->
-                                            viewModel.addFood(name, prot, cal, carb, fat)
+                                                if (shouldSavePreset) {
+                                                    viewModel.addPreset(name, prot, cal, carb, fat)
+                                                }
 
-                                            scannedBarcode?.let { code ->
-                                                viewModel.saveProductMetadata(
-                                                    ProductMetadata(
-                                                        barcode = code,
-                                                        name = name,
-                                                        proteinPer100g = prot,
-                                                        caloriesPer100g = cal,
-                                                        carbsPer100g = carb,
-                                                        fatsPer100g = fat
+                                                scannedBarcode?.let { code ->
+                                                    viewModel.saveProductMetadata(
+                                                        com.example.zilean.data.ProductMetadata(
+                                                            barcode = code,
+                                                            name = name,
+                                                            proteinPer100g = prot,
+                                                            caloriesPer100g = cal,
+                                                            carbsPer100g = carb,
+                                                            fatsPer100g = fat
+                                                        )
                                                     )
-                                                )
-                                            }
+                                                }
 
-                                            showDialog = false
-                                            scannedBarcode = null
-                                            initialData = null
-                                        }
-                                    )
+                                                showDialog = false
+                                                scannedBarcode = null
+                                                initialData = null
+                                            }
+                                        )
+                                    }
                                 }
+                                
+                                
                                 HealthDashboard(
                                     name = userName,
                                     currentCalories = todaysCalories ?: 0,
@@ -135,7 +165,9 @@ class MainActivity : ComponentActivity() {
                                                 showDialog = true
                                             }
                                         }
-                                    }
+                                    },
+                                    onMenuClick = { currentScreen = "jelovnik" },
+                                    onEditEntry = { entry -> viewModel.editFoodEntry(entry) }
                                 )
 
                             }

@@ -35,4 +35,22 @@ interface FoodDao {
     @Query("SELECT * FROM product_metadata WHERE barcode = :barcode LIMIT 1")
     suspend fun getProductByBarcode(barcode: String): ProductMetadata?
 
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertPreset(preset: MealPreset)
+
+    @Query("SELECT * FROM meal_presets ORDER BY name ASC")
+    fun getAllPresets(): Flow<List<MealPreset>>
+
+    @Delete
+    suspend fun deletePreset(preset: MealPreset)
+
+    @Update
+    suspend fun updatePreset(preset: MealPreset)
+
+    @Update
+    suspend fun updateFoodEntry(entry: FoodEntry)
+
+    @Update
+    suspend fun updateProductMetadata(product: ProductMetadata)
+
 }

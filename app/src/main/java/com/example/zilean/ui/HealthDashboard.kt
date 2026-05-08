@@ -9,11 +9,17 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.QrCodeScanner
+import androidx.compose.material.icons.filled.List
 import androidx.compose.material3.*
 import androidx.compose.material3.OutlinedTextFieldDefaults.contentPadding
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -45,9 +51,31 @@ fun HealthDashboard(
     foodList: List<FoodEntry>,
     onAddFoodClick: () -> Unit,
     onDeleteEntry: (FoodEntry) -> Unit,
-    onScanClick: () -> Unit
+    onScanClick: () -> Unit,
+    onMenuClick: () -> Unit,
+    onEditEntry: (FoodEntry) -> Unit
 ) {
     val progress = if (caloriesGoal > 0) (currentCalories * 100) / caloriesGoal else 0
+    var editingEntry by remember { mutableStateOf<FoodEntry?>(null) }
+
+    editingEntry?.let { entry ->
+        AddFoodDialog(
+            initialName = entry.name,
+            initialProtein = entry.protein.toString(),
+            initialCalories = entry.calories.toString(),
+            initialCarbs = entry.carbs.toString(),
+            initialFats = entry.fats.toString(),
+            showSavePresetOption = false,
+            onDismiss = { editingEntry = null },
+            onConfirm = { name, prot, cal, carb, fat, _ ->
+                onEditEntry(entry.copy(
+                    name = name, protein = prot, calories = cal, carbs = carb, fats = fat
+                ))
+                editingEntry = null
+            }
+        )
+    }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -146,7 +174,7 @@ fun HealthDashboard(
             Button(
                 onClick = onAddFoodClick,
                 modifier = Modifier
-                    .fillMaxWidth(0.8f)
+                    .fillMaxWidth(0.6f)
                     .height(64.dp),
                 shape = RoundedCornerShape(12.dp)
             ) {
@@ -160,7 +188,25 @@ fun HealthDashboard(
                 )
             }
 
-            //Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.width(1.dp))
+
+            FilledIconButton(
+                onClick = onMenuClick,
+                modifier = Modifier.size(64.dp).fillMaxWidth(0.6f),
+                shape = RoundedCornerShape(12.dp),
+                colors = IconButtonDefaults.filledIconButtonColors(
+                    containerColor = MaterialTheme.colorScheme.primary
+                )
+            ) {
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.List,
+                    tint = MaterialTheme.colorScheme.onSurface,
+                    modifier = Modifier.size(44.dp),
+                    contentDescription = "Otvori jelovnik"
+                )
+            }
+
+            Spacer(modifier = Modifier.width(1.dp))
 
             FilledIconButton(
                 onClick = onScanClick,
@@ -190,6 +236,7 @@ fun HealthDashboard(
                 FoodItemRow(
                     entry = currentEntry,
                     onDelete = { onDeleteEntry(currentEntry) },
+                    onEdit = { editingEntry = currentEntry } ,
                 )
             }
         }
@@ -273,7 +320,9 @@ fun DashboardLightPreview() {
             foodList = emptyList(),
             onAddFoodClick = { true },
             onDeleteEntry = {true },
-            onScanClick = {true}
+            onScanClick = {true},
+            onMenuClick = {true},
+            onEditEntry = {true},
         )
     }
 }
@@ -296,7 +345,9 @@ fun DashboardDarkPreview() {
             foodList = emptyList(),
             onAddFoodClick = { true },
             onDeleteEntry = {true },
-            onScanClick = {true}
+            onScanClick = {true},
+            onMenuClick = {true},
+            onEditEntry = {true},
         )
     }
 }

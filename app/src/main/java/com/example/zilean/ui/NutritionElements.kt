@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -36,25 +37,31 @@ fun ProteinCard(label: String, amount: Double) {
 }
 
 @Composable
-fun FoodItemRow(entry: FoodEntry, onDelete: () -> Unit) {
+fun FoodItemRow(entry: FoodEntry, onDelete: () -> Unit, onEdit: () -> Unit) {
     Card(
         modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
-        shape = RoundedCornerShape(8.dp)
+        shape = RoundedCornerShape(12.dp)
     ) {
         Row(
-            modifier = Modifier.padding(12.dp).fillMaxWidth(),
+            modifier = Modifier.padding(16.dp).fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            Column {
+            Column (modifier = Modifier.weight(1f)){
                 Text(text = entry.name, fontWeight = FontWeight.Bold, style = MaterialTheme.typography.titleLarge)
                 Text(
                     text = "| ${entry.calories} kcal | P:${entry.protein}g | H:${entry.carbs}g | M:${entry.fats}g",
                     style = MaterialTheme.typography.bodyMedium
                 )
             }
+            IconButton(onClick = onEdit) {
+                Icon(
+                    imageVector = Icons.Default.Edit,
+                    contentDescription = "Izmeni",
+                    tint = MaterialTheme.colorScheme.primary
+                )
+            }
             IconButton(onClick = onDelete) {
-                Icon(Icons.Default.Delete, contentDescription = "Obriši", tint = Color.Red)
+                Icon(Icons.Default.Delete, contentDescription = "Obrisi", tint = Color.Red)
             }
         }
     }

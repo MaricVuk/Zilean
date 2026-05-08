@@ -1,0 +1,512 @@
+package com.example.zilean.ui
+
+import android.content.res.Configuration
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.animateIntAsState
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.List
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.LocalDrink
+import androidx.compose.material.icons.filled.QrCodeScanner
+import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material3.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import com.example.zilean.data.FoodEntry
+import com.example.zilean.ui.theme.ZileanTheme
+import java.util.Calendar
+
+@Composable
+fun HealthDashboard(
+    name: String?,
+    currentCalories: Int,
+    currentProtein: Int,
+    currentCarb: Int,
+    currentFat: Int,
+    proteinGoal: Int,
+    caloriesGoal: Int,
+    carbsGoal: Int,
+    fatsGoal: Int,
+    foodList: List<FoodEntry>,
+    onAddFoodClick: () -> Unit,
+    onDeleteEntry: (FoodEntry) -> Unit,
+    onScanClick: () -> Unit,
+    onMenuClick: () -> Unit,
+    onEditEntry: (FoodEntry) -> Unit,
+    onSettingsClick: () -> Unit,
+    selectedDate: Calendar,
+    onDateChange: (Calendar) -> Unit,
+    onPreviousDay: () -> Unit,
+    onNextDay: () -> Unit,
+    waterGoal: Int,
+    currentWater: Int,
+    onAddWater: (Int) -> Unit
+) {
+    val progress = if (caloriesGoal > 0) (currentCalories * 100) / caloriesGoal else 0
+    var editingEntry by remember { mutableStateOf<FoodEntry?>(null) }
+    var showWaterDialog by remember { mutableStateOf(false) }
+
+    if (showWaterDialog) {
+        AddWaterDialog(
+            onDismiss = { showWaterDialog = false },
+            onConfirm = { amount ->
+                onAddWater(amount)
+                showWaterDialog = false
+            }
+        )
+    }
+
+
+    val animatedCalories by animateIntAsState(
+        targetValue = currentCalories,
+        animationSpec = tween(durationMillis = 1000, easing = FastOutSlowInEasing),
+        label = "CaloriesAnimation"
+    )
+    val animatedProtein by animateIntAsState(
+        targetValue = currentProtein,
+        animationSpec = tween(durationMillis = 1000, easing = FastOutSlowInEasing),
+        label = "ProteinAnimation"
+    )
+
+    val animatedCarbs by animateIntAsState(
+        targetValue = currentCarb,
+        animationSpec = tween(durationMillis = 1000, easing = FastOutSlowInEasing),
+        label = "CarbsAnimation"
+    )
+
+    val animatedFats by animateIntAsState(
+        targetValue = currentFat,
+        animationSpec = tween(durationMillis = 1000, easing = FastOutSlowInEasing),
+        label = "FatsAnimation"
+    )
+
+    val targetProgress = if (caloriesGoal > 0) currentCalories.toFloat() / caloriesGoal else 0f
+    val animatedProgress by animateFloatAsState(
+        targetValue = targetProgress,
+        animationSpec = tween(durationMillis = 1000, easing = FastOutSlowInEasing),
+        label = "ProgressAnimation"
+    )
+
+
+    editingEntry?.let { entry ->
+        AddFoodDialog(
+            initialName = entry.name,
+            initialProtein = entry.protein.toString(),
+            initialCalories = entry.calories.toString(),
+            initialCarbs = entry.carbs.toString(),
+            initialFats = entry.fats.toString(),
+            showSavePresetOption = false,
+            onDismiss = { editingEntry = null },
+            onConfirm = { name, prot, cal, carb, fat, _ ->
+                onEditEntry(entry.copy(
+                    name = name, protein = prot, calories = cal, carbs = carb, fats = fat
+                ))
+                editingEntry = null
+            }
+        )
+    }
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp)
+            .background(MaterialTheme.colorScheme.background)
+    ) {
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            colors = CardDefaults.cardColors(MaterialTheme.colorScheme.surface),
+            shape = RoundedCornerShape(24.dp)
+        ) {
+            Row(
+                modifier = Modifier.padding(24.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Box(contentAlignment = Alignment.Center) {
+
+                    CircularProgressIndicator(
+                        progress = animatedProgress,
+                        modifier = Modifier.size(100.dp),
+                        color = MaterialTheme.colorScheme.primary,
+                        strokeWidth = 8.dp,
+                        trackColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                        strokeCap = StrokeCap.Round
+                    )
+                    Text(
+                        progress.toString() + "%",
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 28.sp
+                    )
+                }
+
+                Spacer(modifier = Modifier.width(32.dp))
+
+                Column {
+                    Text("Kalorije", color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 18.sp)
+                    Row (verticalAlignment = Alignment.Bottom, horizontalArrangement = Arrangement.spacedBy(4.dp)){
+                        Text(
+                            animatedCalories.toString(),
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            fontSize = 36.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                        Text(
+                            "/"  + caloriesGoal.toString(),
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            fontSize = 18.sp,
+                            fontWeight = FontWeight.Normal
+
+                        )
+                    }
+                    Text("kcal", color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 18.sp)
+                }
+            }
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            MacroCard(
+                label = "Hidrati",
+                value = animatedCarbs.toString(),
+                value2 = carbsGoal.toString(),
+                color = Color(0xFF3B82F6),
+                modifier = Modifier.weight(1f)
+            )
+            MacroCard(
+                label = "Proteini",
+                value = animatedProtein.toString(),
+                value2 = proteinGoal.toString(),
+                color = Color(0xFFc40404),
+                modifier = Modifier.weight(1f)
+            )
+            MacroCard(
+                label = "Masti",
+                value = animatedFats.toString(),
+                value2 = fatsGoal.toString(),
+                color = Color(0xFFFACC15),
+                modifier = Modifier.weight(1f)
+            )
+        }
+
+        Spacer(modifier = Modifier.height(24.dp))
+
+
+
+
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            WaterCard(modifier = Modifier.weight(1f), currentWater = currentWater, waterGoal = waterGoal, onAddWater = { showWaterDialog = true })
+
+            Column(modifier = Modifier, horizontalAlignment = Alignment.End) {
+                Row(modifier = Modifier, horizontalArrangement = Arrangement.End) {
+                    FilledIconButton(
+                        onClick = onMenuClick,
+                        modifier = Modifier.size(64.dp),
+                        shape = RoundedCornerShape(12.dp),
+                        colors = IconButtonDefaults.filledIconButtonColors(
+                            containerColor = MaterialTheme.colorScheme.primary
+                        )
+                    ) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.List,
+                            tint = MaterialTheme.colorScheme.onSurface,
+                            modifier = Modifier.size(50.dp),
+                            contentDescription = "Otvori jelovnik"
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.width(12.dp))
+
+                    FilledIconButton(
+                        onClick = onAddFoodClick,
+                        modifier = Modifier
+                            .height(64.dp)
+                            .width(64.dp),
+                        shape = RoundedCornerShape(12.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Add,
+                            tint = MaterialTheme.colorScheme.onSurface,
+                            modifier = Modifier.size(50.dp),
+                            contentDescription = "Dodaj novo"
+                        )
+                    }
+
+                }
+                Spacer(modifier = Modifier.height(12.dp))
+                Row(modifier = Modifier, horizontalArrangement = Arrangement.End) {
+                    FilledIconButton(
+                        onClick = onScanClick,
+                        modifier = Modifier.size(64.dp).fillMaxWidth(0.2f),
+                        shape = RoundedCornerShape(12.dp),
+                        colors = IconButtonDefaults.filledIconButtonColors(
+                            containerColor = MaterialTheme.colorScheme.primary
+                        ),
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.QrCodeScanner,
+                            contentDescription = "Skeniraj bar-kod",
+                            Modifier.size(50.dp),
+                            tint = MaterialTheme.colorScheme.onSurface
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.width(12.dp))
+
+                    FilledIconButton(
+                        onClick = onSettingsClick,
+                        modifier = Modifier.size(64.dp),
+                        shape = RoundedCornerShape(12.dp),
+                        colors = IconButtonDefaults.filledIconButtonColors(
+                            containerColor = MaterialTheme.colorScheme.primary
+                        ),
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Settings,
+                            contentDescription = "Settings",
+                            Modifier.size(50.dp),
+                            tint = MaterialTheme.colorScheme.onSurface
+                        )
+                    }
+                }
+            }
+        }
+
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        CalendarHeader(
+            selectedDate = selectedDate,
+            onDateChange = onDateChange,
+            onPreviousDay = onPreviousDay,
+            onNextDay = onNextDay,
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+        //Text(text = "Obroci:", style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.onSurface)
+
+        LazyColumn(
+            modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background),
+            contentPadding = PaddingValues(bottom = 16.dp),
+            ) {
+            items(foodList) { currentEntry ->
+                FoodItemRow(
+                    entry = currentEntry,
+                    onDelete = { onDeleteEntry(currentEntry) },
+                    onEdit = { editingEntry = currentEntry },
+                )
+            }
+        }
+    }
+}
+
+
+@Composable
+fun WaterCard(
+    currentWater: Int,
+    waterGoal: Int,
+    onAddWater: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val animatedWater by animateIntAsState(
+        targetValue = currentWater,
+        animationSpec = tween(durationMillis = 1000, easing = FastOutSlowInEasing),
+        label = "WaterAnimation"
+    )
+
+    Card(
+        modifier = modifier.fillMaxWidth().height(140.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        shape = RoundedCornerShape(16.dp),
+
+    ) {
+        Row(
+            modifier = Modifier.padding(16.dp).fillMaxSize(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+
+            Column {
+                Text(
+                    text = "Voda",
+                    color = Color(0xFF34D399),
+                    fontSize = 24.sp,
+                    fontWeight = FontWeight.Bold
+                )
+
+                Row(verticalAlignment = Alignment.Bottom) {
+                    Text(
+                        text = animatedWater.toString(),
+                        fontSize = 24.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                    Text(
+                        text = " /$waterGoal",
+                        fontSize = 14.sp,
+                        modifier = Modifier,//.padding(start = 4.dp, bottom = 2.dp),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.width(8.dp))
+
+            IconButton(
+                onClick = onAddWater,
+                modifier = Modifier
+                    .background(
+                        color = Color(0xFF34D399).copy(alpha = 0.2f),
+                        shape = RoundedCornerShape(64.dp),
+                    ).size(80.dp)
+
+            ) {
+                Icon(
+                    imageVector = Icons.Default.LocalDrink,
+                    contentDescription = "Dodaj vodu",
+                    tint = Color(0xFF34D399),
+                    modifier = Modifier.size(54.dp)
+                )
+            }
+        }
+    }
+}
+@Composable
+fun MacroCard(
+    label: String,
+    value: String,
+    value2: String,
+    color: Color,
+    modifier: Modifier
+) {
+    Card(
+        modifier = modifier,
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        shape = RoundedCornerShape(16.dp)
+    ) {
+        Column(modifier = Modifier.padding(12.dp)) {
+            Text(
+                text = label,
+                color = color,
+                fontSize = 20.sp,
+                fontWeight = FontWeight.Bold,
+            )
+
+            Spacer(modifier = Modifier.height(3.dp))
+
+            Row (
+                verticalAlignment = Alignment.Top,
+                horizontalArrangement = Arrangement.spacedBy(4.dp)
+            ){
+                Text(
+                    text = value,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.alignByBaseline()
+
+                )
+                Text(
+                    text = "/" + value2,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.Normal,
+                    modifier = Modifier.alignByBaseline()
+
+                )
+            }
+        }
+    }
+}
+
+@Preview(name = "Light Mode", showBackground = true)
+@Composable
+fun DashboardLightPreview() {
+    ZileanTheme(darkTheme = false) {
+        HealthDashboard(
+            name = "Vuk",
+            currentCalories = 1538,
+            currentProtein = 73,
+            currentCarb = 127,
+            currentFat = 13,
+
+            proteinGoal = 250,
+            caloriesGoal = 2750,
+            carbsGoal = 600,
+            fatsGoal = 80,
+            waterGoal = 2000,
+            currentWater = 1000,
+            onAddWater = { },
+            foodList = emptyList(),
+            onAddFoodClick = { },
+            onDeleteEntry = { },
+            onScanClick = { },
+            onMenuClick = { },
+            onEditEntry = { },
+            onSettingsClick = { },
+            selectedDate = java.util.Calendar.getInstance(),
+            onDateChange = { },
+            onPreviousDay = { },
+            onNextDay = { }
+        )
+    }
+}
+
+@Preview(name = "Dark Mode", showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES)
+@Composable
+fun DashboardDarkPreview() {
+    ZileanTheme(darkTheme = true) {
+        HealthDashboard(
+            name = "Vuk",
+            currentCalories = 1538,
+            currentProtein = 73,
+            currentCarb = 127,
+            currentFat = 13,
+
+            proteinGoal = 250,
+            caloriesGoal = 2750,
+            carbsGoal = 600,
+            fatsGoal = 80,
+            waterGoal = 2000,
+            currentWater = 1000,
+            onAddWater = { },
+            foodList = emptyList(),
+            onAddFoodClick = { },
+            onDeleteEntry = { },
+            onScanClick = { },
+            onMenuClick = { },
+            onEditEntry = { },
+            onSettingsClick = { },
+            selectedDate = java.util.Calendar.getInstance(),
+            onDateChange = { },
+            onPreviousDay = { },
+            onNextDay = { }
+        )
+    }
+}

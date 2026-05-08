@@ -1,6 +1,10 @@
 package com.example.zilean.ui
 
 import android.content.res.Configuration
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.animateIntAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -20,6 +24,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -44,10 +49,46 @@ fun HealthDashboard(
     onScanClick: () -> Unit,
     onMenuClick: () -> Unit,
     onEditEntry: (FoodEntry) -> Unit,
-    onSettingsClick: () -> Unit
+    onSettingsClick: () -> Unit,
+    selectedDate: java.util.Calendar,
+    onDateChange: (java.util.Calendar) -> Unit,
+    onPreviousDay: () -> Unit,
+    onNextDay: () -> Unit
 ) {
     val progress = if (caloriesGoal > 0) (currentCalories * 100) / caloriesGoal else 0
     var editingEntry by remember { mutableStateOf<FoodEntry?>(null) }
+
+
+    val animatedCalories by animateIntAsState(
+        targetValue = currentCalories,
+        animationSpec = tween(durationMillis = 1000, easing = FastOutSlowInEasing),
+        label = "CaloriesAnimation"
+    )
+    val animatedProtein by animateIntAsState(
+        targetValue = currentProtein,
+        animationSpec = tween(durationMillis = 1000, easing = FastOutSlowInEasing),
+        label = "ProteinAnimation"
+    )
+
+    val animatedCarbs by animateIntAsState(
+        targetValue = currentCarb,
+        animationSpec = tween(durationMillis = 1000, easing = FastOutSlowInEasing),
+        label = "CarbsAnimation"
+    )
+
+    val animatedFats by animateIntAsState(
+        targetValue = currentFat,
+        animationSpec = tween(durationMillis = 1000, easing = FastOutSlowInEasing),
+        label = "FatsAnimation"
+    )
+
+    val targetProgress = if (caloriesGoal > 0) currentCalories.toFloat() / caloriesGoal else 0f
+    val animatedProgress by animateFloatAsState(
+        targetValue = targetProgress,
+        animationSpec = tween(durationMillis = 1000, easing = FastOutSlowInEasing),
+        label = "ProgressAnimation"
+    )
+
 
     editingEntry?.let { entry ->
         AddFoodDialog(
@@ -83,13 +124,14 @@ fun HealthDashboard(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Box(contentAlignment = Alignment.Center) {
+
                     CircularProgressIndicator(
-                        //progress = 0.65f,
-                        progress = progress.toFloat() / 100,
+                        progress = { animatedProgress },
                         modifier = Modifier.size(100.dp),
                         color = MaterialTheme.colorScheme.primary,
                         strokeWidth = 8.dp,
-                        trackColor = MaterialTheme.colorScheme.onSurfaceVariant
+                        trackColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                        strokeCap = StrokeCap.Round
                     )
                     Text(
                         progress.toString() + "%",
@@ -105,7 +147,7 @@ fun HealthDashboard(
                     Text("Kalorije", color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 18.sp)
                     Row (verticalAlignment = Alignment.Bottom, horizontalArrangement = Arrangement.spacedBy(4.dp)){
                         Text(
-                            currentCalories.toString(),
+                            animatedCalories.toString(),
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                             fontSize = 36.sp,
                             fontWeight = FontWeight.Bold
@@ -131,21 +173,21 @@ fun HealthDashboard(
         ) {
             MacroCard(
                 label = "Hidrati",
-                value = currentCarb.toString(),
+                value = animatedCarbs.toString(),
                 value2 = carbsGoal.toString(),
                 color = Color(0xFF3B82F6),
                 modifier = Modifier.weight(1f)
             )
             MacroCard(
                 label = "Proteini",
-                value = currentProtein.toString(),
+                value = animatedProtein.toString(),
                 value2 = proteinGoal.toString(),
                 color = Color(0xFFc40404),
                 modifier = Modifier.weight(1f)
             )
             MacroCard(
                 label = "Masti",
-                value = currentFat.toString(),
+                value = animatedFats.toString(),
                 value2 = fatsGoal.toString(),
                 color = Color(0xFFFACC15),
                 modifier = Modifier.weight(1f)
@@ -229,10 +271,17 @@ fun HealthDashboard(
 
         }
 
+        Spacer(modifier = Modifier.height(16.dp))
 
+        CalendarHeader(
+            selectedDate = selectedDate,
+            onDateChange = onDateChange,
+            onPreviousDay = onPreviousDay,
+            onNextDay = onNextDay,
+        )
 
         Spacer(modifier = Modifier.height(16.dp))
-        Text(text = "Danasnji obroci:", style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.onSurface)
+        //Text(text = "Obroci:", style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.onSurface)
 
         LazyColumn(
             modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background),
@@ -316,10 +365,13 @@ fun DashboardLightPreview() {
             onAddFoodClick = { true },
             onDeleteEntry = {true },
             onScanClick = {true},
-            onMenuClick = {true},
-            onEditEntry = {true},
-            onSettingsClick = {true},
-
+            onMenuClick = { },
+            onEditEntry = { },
+            onSettingsClick = { },
+            selectedDate = java.util.Calendar.getInstance(),
+            onDateChange = { },
+            onPreviousDay = { },
+            onNextDay = { }
         )
     }
 }
@@ -343,10 +395,13 @@ fun DashboardDarkPreview() {
             onAddFoodClick = { true },
             onDeleteEntry = {true },
             onScanClick = {true},
-            onMenuClick = {true},
-            onEditEntry = {true},
-            onSettingsClick = {true},
-
+            onMenuClick = { },
+            onEditEntry = { },
+            onSettingsClick = { },
+            selectedDate = java.util.Calendar.getInstance(),
+            onDateChange = { },
+            onPreviousDay = { },
+            onNextDay = { }
         )
     }
 }

@@ -10,11 +10,39 @@ import com.example.zilean.data.MealPreset
 import com.example.zilean.data.ProductMetadata
 import com.google.mlkit.vision.codescanner.GmsBarcodeScanning
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.launch
 import java.util.*
 
 class FoodViewModel(application: Application) : AndroidViewModel(application) {
     private val dao = AppDatabase.getDatabase(application).foodDao()
+
+    private val _selectedDate = MutableStateFlow(Calendar.getInstance().apply {
+        set(Calendar.HOUR_OF_DAY, 0)
+        set(Calendar.MINUTE, 0)
+        set(Calendar.SECOND, 0)
+        set(Calendar.MILLISECOND, 0)
+    })
+    val selectedDate: StateFlow<Calendar> = _selectedDate
+
+    fun setSelectedDate(calendar: Calendar) {
+        val newDate = (calendar.clone() as Calendar).apply {
+            set(Calendar.HOUR_OF_DAY, 0)
+            set(Calendar.MINUTE, 0)
+            set(Calendar.SECOND, 0)
+            set(Calendar.MILLISECOND, 0)
+        }
+        _selectedDate.value = newDate
+    }
+
+    fun changeDate(days: Int) {
+        val newDate = (_selectedDate.value.clone() as Calendar).apply {
+            add(Calendar.DAY_OF_YEAR, days)
+        }
+        _selectedDate.value = newDate
+    }
 
 
     val allFood: Flow<List<FoodEntry>> = dao.getAllFood()
@@ -28,58 +56,41 @@ class FoodViewModel(application: Application) : AndroidViewModel(application) {
                 protein = protein,
                 calories = calories,
                 carbs = carbs,
-                fats = fats
+                fats = fats,
+                date = _selectedDate.value.timeInMillis + (System.currentTimeMillis() % (24 * 60 * 60 * 1000))
             )
             dao.insertFood(newEntry)
         }
     }
 
-    fun getTodaysProtein(): Flow<Int?> {
-        val calendar = Calendar.getInstance().apply {
-            set(Calendar.HOUR_OF_DAY, 0)
-            set(Calendar.MINUTE, 0)
-            set(Calendar.SECOND, 0)
-            set(Calendar.MILLISECOND, 0)
-        }
-        return dao.getTodaysProtein(calendar.timeInMillis)
-    }
-    fun getTodaysCalories(): Flow<Int?> {
-        val calendar = Calendar.getInstance().apply {
-            set(Calendar.HOUR_OF_DAY, 0)
-            set(Calendar.MINUTE, 0)
-            set(Calendar.SECOND, 0)
-            set(Calendar.MILLISECOND, 0)
-        }
-        return dao.getTodaysCalories(calendar.timeInMillis)
-    }
-    fun getTodaysCarbs(): Flow<Int?> {
-        val calendar = Calendar.getInstance().apply {
-            set(Calendar.HOUR_OF_DAY, 0)
-            set(Calendar.MINUTE, 0)
-            set(Calendar.SECOND, 0)
-            set(Calendar.MILLISECOND, 0)
-        }
-        return dao.getTodaysCarbs(calendar.timeInMillis)
-    }
-    fun getTodaysFats(): Flow<Int?> {
-        val calendar = Calendar.getInstance().apply {
-            set(Calendar.HOUR_OF_DAY, 0)
-            set(Calendar.MINUTE, 0)
-            set(Calendar.SECOND, 0)
-            set(Calendar.MILLISECOND, 0)
-        }
-        return dao.getTodaysFats(calendar.timeInMillis)
+    fun getTodaysProtein(): Flow<Int?> = _selectedDate.flatMapLatest { date ->
+        val startOfDay = date.timeInMillis
+        val endOfDay = startOfDay + 24 * 60 * 60 * 1000
+        dao.getProteinForDate(startOfDay, endOfDay)
     }
 
+    fun getTodaysCalories(): Flow<Int?> = _selectedDate.flatMapLatest { date ->
+        val startOfDay = date.timeInMillis
+        val endOfDay = startOfDay + 24 * 60 * 60 * 1000
+        dao.getCaloriesForDate(startOfDay, endOfDay)
+    }
 
-    fun getTodaysFoodEntries(): Flow<List<FoodEntry>> {
-        val calendar = Calendar.getInstance().apply {
-            set(Calendar.HOUR_OF_DAY, 0)
-            set(Calendar.MINUTE, 0)
-            set(Calendar.SECOND, 0)
-            set(Calendar.MILLISECOND, 0)
-        }
-        return dao.getTodaysFoodList(calendar.timeInMillis)
+    fun getTodaysCarbs(): Flow<Int?> = _selectedDate.flatMapLatest { date ->
+        val startOfDay = date.timeInMillis
+        val endOfDay = startOfDay + 24 * 60 * 60 * 1000
+        dao.getCarbsForDate(startOfDay, endOfDay)
+    }
+
+    fun getTodaysFats(): Flow<Int?> = _selectedDate.flatMapLatest { date ->
+        val startOfDay = date.timeInMillis
+        val endOfDay = startOfDay + 24 * 60 * 60 * 1000
+        dao.getFatsForDate(startOfDay, endOfDay)
+    }
+
+    fun getTodaysFoodEntries(): Flow<List<FoodEntry>> = _selectedDate.flatMapLatest { date ->
+        val startOfDay = date.timeInMillis
+        val endOfDay = startOfDay + 24 * 60 * 60 * 1000
+        dao.getFoodListForDate(startOfDay, endOfDay)
     }
 
     fun deleteEntry(entry: FoodEntry) {

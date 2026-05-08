@@ -33,6 +33,7 @@ fun ZileanApp(
         val todaysCarbs by viewModel.getTodaysCarbs().collectAsState(initial = 0)
         val todaysFats by viewModel.getTodaysFats().collectAsState(initial = 0)
         val foodList by viewModel.getTodaysFoodEntries().collectAsState(initial = emptyList())
+        val selectedDate by viewModel.selectedDate.collectAsState()
 
         var showDialog by remember { mutableStateOf(false) }
         var scannedBarcode by remember { mutableStateOf<String?>(null) }
@@ -143,7 +144,11 @@ fun ZileanApp(
                         },
                         onMenuClick = { currentScreen = "jelovnik" },
                         onEditEntry = { entry -> viewModel.editFoodEntry(entry) },
-                        onSettingsClick = { currentScreen = "settings" }
+                        onSettingsClick = { currentScreen = "settings" },
+                        selectedDate = selectedDate,
+                        onDateChange = { date -> viewModel.setSelectedDate(date) },
+                        onPreviousDay = { viewModel.changeDate(-1) },
+                        onNextDay = { viewModel.changeDate(1) }
                     )
                 }
             }

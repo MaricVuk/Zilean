@@ -22,9 +22,41 @@ fun SettingsScreen(
     name: String?,
     isDarkMode: Boolean,
     onThemeToggle: (Boolean) -> Unit,
-    onBack: () -> Unit
+    onBack: () -> Unit,
+    onOpenGoals: () -> Unit,
+    onUpdateName: (String) -> Unit
 ) {
     var showEditUserDialog by remember { mutableStateOf(false) }
+    var editedName by remember { mutableStateOf(name ?: "") }
+
+    if (showEditUserDialog) {
+        AlertDialog(
+            onDismissRequest = { showEditUserDialog = false },
+            title = { Text("Izmeni ime") },
+            text = {
+                OutlinedTextField(
+                    value = editedName,
+                    onValueChange = { editedName = it },
+                    label = { Text("Ime") },
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth()
+                )
+            },
+            confirmButton = {
+                Button(onClick = {
+                    onUpdateName(editedName)
+                    showEditUserDialog = false
+                }) {
+                    Text("Sacuvaj")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showEditUserDialog = false }) {
+                    Text("Otkazi")
+                }
+            }
+        )
+    }
 
     Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
         Row(verticalAlignment = Alignment.CenterVertically) {
@@ -39,12 +71,24 @@ fun SettingsScreen(
             item {
                 SettingsSectionTitle("Korisnicki podaci")
                 Card(
-                    modifier = Modifier.fillMaxWidth().clickable { showEditUserDialog = true },
+                    modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp).clickable { showEditUserDialog = true },
                     colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
                 ) {
                     Column(modifier = Modifier.padding(16.dp)) {
                         Text("Ime: $name", fontWeight = FontWeight.Bold)
                         Text(text = "Klikni za izmenu", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.primary)
+                    }
+                }
+            }
+
+            item {
+                Card(
+                    modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp).clickable { onOpenGoals() },
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+                ) {
+                    Column(modifier = Modifier.padding(16.dp)) {
+                        Text("Ciljevi", fontWeight = FontWeight.Bold)
+                        Text(text = "Kalorije, makronutrijenti, voda", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.primary)
                     }
                 }
             }

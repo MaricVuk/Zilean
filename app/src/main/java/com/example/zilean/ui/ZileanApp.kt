@@ -74,6 +74,24 @@ fun ZileanApp(
                         onBack = { currentScreen = "dashboard" },
                         isDarkMode = isDarkMode,
                         onThemeToggle = onThemeToggle,
+                        onOpenGoals = { currentScreen = "goals" },
+                        onUpdateName = { newName ->
+                            onSaveUserData(newName, goalCal.toString(), goalProt.toString(), goalCarb.toString(), goalFat.toString(), goalWater.toString())
+                        }
+                    )
+                }
+
+                "goals" -> {
+                    GoalsScreen(
+                        currentCalories = goalCal,
+                        currentProtein = goalProt,
+                        currentCarbs = goalCarb,
+                        currentFats = goalFat,
+                        currentWater = goalWater,
+                        onSaveGoals = { cal, prot, carb, fat, water ->
+                            onSaveUserData(userName, cal.toString(), prot.toString(), carb.toString(), fat.toString(), water.toString())
+                        },
+                        onBack = { currentScreen = "settings" }
                     )
                 }
 

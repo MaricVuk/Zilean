@@ -24,6 +24,7 @@ fun SettingsScreen(
     onThemeToggle: (Boolean) -> Unit,
     onBack: () -> Unit,
     onOpenGoals: () -> Unit,
+    onOpenScannedProducts: () -> Unit,
     onUpdateName: (String) -> Unit
 ) {
     var showEditUserDialog by remember { mutableStateOf(false) }
@@ -89,6 +90,18 @@ fun SettingsScreen(
                     Column(modifier = Modifier.padding(16.dp)) {
                         Text("Ciljevi", fontWeight = FontWeight.Bold)
                         Text(text = "Kalorije, makronutrijenti, voda", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.primary)
+                    }
+                }
+            }
+
+            item {
+                Card(
+                    modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp).clickable { onOpenScannedProducts() },
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+                ) {
+                    Column(modifier = Modifier.padding(16.dp)) {
+                        Text("Skenirani proizvodi", fontWeight = FontWeight.Bold)
+                        Text(text = "Upravljaj skeniranim artiklima", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.primary)
                     }
                 }
             }

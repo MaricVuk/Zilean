@@ -163,6 +163,18 @@ class FoodViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
+    fun deleteProduct(product: ProductMetadata) {
+        viewModelScope.launch {
+            dao.deleteProduct(product)
+        }
+    }
+
+    fun editProduct(product: ProductMetadata) {
+        viewModelScope.launch {
+            dao.updateProductMetadata(product)
+        }
+    }
+
 
 
 }

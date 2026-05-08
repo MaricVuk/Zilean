@@ -75,9 +75,20 @@ fun ZileanApp(
                         isDarkMode = isDarkMode,
                         onThemeToggle = onThemeToggle,
                         onOpenGoals = { currentScreen = "goals" },
+                        onOpenScannedProducts = { currentScreen = "scanned_products" },
                         onUpdateName = { newName ->
                             onSaveUserData(newName, goalCal.toString(), goalProt.toString(), goalCarb.toString(), goalFat.toString(), goalWater.toString())
                         }
+                    )
+                }
+
+                "scanned_products" -> {
+                    val products by viewModel.allProducts.collectAsState(initial = emptyList())
+                    ScannedProductsScreen(
+                        products = products,
+                        onBack = { currentScreen = "settings" },
+                        onDeleteProduct = { product -> viewModel.deleteProduct(product) },
+                        viewModel = viewModel
                     )
                 }
 

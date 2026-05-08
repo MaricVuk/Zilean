@@ -62,5 +62,8 @@ interface FoodDao {
     @Update
     suspend fun updateProductMetadata(product: ProductMetadata)
 
+    @Delete
+    suspend fun deleteProduct(product: ProductMetadata)
+
 
 }
